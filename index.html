@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07070C" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Фото конкурс</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg0: #07070C;
+      --bg1: #12121C;
+      --card: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.12);
+      --text: #F6F6F8;
+      --muted: #9A9AAB;
+      --pink: #FF4D8D;
+      --pink-2: #FF7AB0;
+      --blue: #4D7CFF;
+      --blue-2: #7AA0FF;
+      --gold: #F5C15A;
+      --gold-2: #FFE09A;
+      --max-a: #5B6CFF;
+      --max-b: #8B5CFF;
+      --ok: #3DDC97;
+      --radius: 18px;
+      --safe-t: env(safe-area-inset-top, 0px);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --frame-height: 380px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { background: var(--bg0); color: var(--text); }
+    body {
+      font-family: Manrope, system-ui, sans-serif;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      padding-bottom: calc(28px + var(--safe-b));
+    }
+    img { display: block; max-width: 100%; }
+    button { font-family: inherit; cursor: pointer; border: 0; }
+    a { color: inherit; }
+
+    .bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(900px 420px at 10% -10%, rgba(255,77,141,.22), transparent 55%),
+        radial-gradient(800px 380px at 110% 8%, rgba(77,124,255,.22), transparent 55%),
+        radial-gradient(700px 500px at 50% 110%, rgba(139,92,255,.16), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1) 50%, #0B0B14);
+    }
+    .bg::after {
+      content: "";
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+      opacity: .05; mix-blend-mode: overlay;
+    }
+
+    .wrap {
+      position: relative; z-index: 1;
+      width: min(560px, 100%);
+      margin: 0 auto;
+      padding: calc(12px + var(--safe-t)) 14px 0;
+    }
+
+    header.appbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo {
+      width: 36px; height: 36px; border-radius: 11px;
+      background: linear-gradient(135deg, var(--gold), #E08A2A);
+      display: grid; place-items: center;
+      box-shadow: 0 8px 20px rgba(245,193,90,.25);
+    }
+    .logo svg { width: 18px; height: 18px; }
+    .brand-name { font-family: Unbounded, sans-serif; font-size: 14px; letter-spacing: -.02em; }
+    .brand-sub { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .live {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: 999px;
+      background: rgba(255,77,77,.12);
+      border: 1px solid rgba(255,77,77,.28);
+      font-size: 11px; font-weight: 700; letter-spacing: .04em;
+    }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #FF4D4D;
+      box-shadow: 0 0 0 0 rgba(255,77,77,.7);
+      animation: pulse 1.6s infinite;
+    }
+    @keyframes pulse {
+      70% { box-shadow: 0 0 0 8px rgba(255,77,77,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,77,77,0); }
+    }
+
+    .hero { margin-bottom: 18px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 10px; border-radius: 999px;
+      background: rgba(245,193,90,.12);
+      border: 1px solid rgba(245,193,90,.28);
+      color: var(--gold-2); font-size: 11px; font-weight: 700;
+      letter-spacing: .04em; text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-family: Unbounded, sans-serif;
+      font-size: clamp(22px, 6.4vw, 30px);
+      line-height: 1.15; letter-spacing: -.04em;
+      margin-bottom: 8px;
+    }
+    h1 span { background: linear-gradient(90deg, var(--gold), #fff 55%, var(--pink-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .lead { color: var(--muted); font-size: 14px; line-height: 1.45; font-weight: 500; }
+
+    .stats {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+      margin: 16px 0 20px;
+    }
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      padding: 12px 8px 11px;
+      text-align: center;
+      backdrop-filter: blur(16px);
+    }
+    .stat b {
+      display: block;
+      font-family: Unbounded, sans-serif;
+      font-size: 16px; letter-spacing: -.03em;
+    }
+    .stat span { display: block; margin-top: 3px; font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    .stat.gold b { color: var(--gold); }
+
+    .section-h {
+      display: flex; align-items: end; justify-content: space-between;
+      margin: 6px 2px 10px;
+    }
+    .section-h h2 {
+      font-family: Unbounded, sans-serif;
+      font-size: 15px; letter-spacing: -.03em;
+    }
+    .section-h p { font-size: 11px; color: var(--muted); font-weight: 600; }
+
+    /* DUEL — always two columns, even on 320px */
+    .duel-wrap { position: relative; margin-bottom: 8px; }
+    .duel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: 20px;
+      padding: 7px 7px 10px;
+      backdrop-filter: blur(18px);
+      overflow: hidden;
+      min-width: 0;
+    }
+    .card.pink { --acc: var(--pink); --acc2: var(--pink-2); }
+    .card.blue { --acc: var(--blue); --acc2: var(--blue-2); }
+    .card.leader {
+      border-color: rgba(77,124,255,.45);
+      box-shadow: 0 10px 30px rgba(77,124,255,.16);
+    }
+    .photo {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .photo img {
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: top;
+    }
+    .photo::after {
+      content: "";
+      position: absolute; inset: auto 0 0;
+      height: 42%;
+      background: linear-gradient(180deg, transparent, rgba(8,8,14,.88));
+    }
+    .badge {
+      position: absolute; top: 8px; left: 8px; z-index: 2;
+      padding: 4px 8px; border-radius: 999px;
+      font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+      background: rgba(0,0,0,.5); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.14);
+    }
+    .badge.hot { color: var(--gold); border-color: rgba(245,193,90,.35); }
+    .badge.catch { color: var(--pink-2); }
+    .namebox {
+      position: absolute; left: 8px; right: 8px; bottom: 8px; z-index: 2;
+    }
+    .namebox h3 {
+      font-size: 13px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15;
+    }
+    .namebox p { font-size: 10px; color: #cfcfd8; font-weight: 600; margin-top: 2px; }
+
+    .votes {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding: 10px 4px 8px;
+    }
+    .votes b {
+      font-family: Unbounded, sans-serif;
+      font-size: 22px; letter-spacing: -.04em; color: var(--acc);
+      font-variant-numeric: tabular-nums;
+    }
+    .votes span { font-size: 11px; color: var(--muted); font-weight: 700; }
+
+    .vote-btn {
+      width: 100%;
+      min-height: 44px;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--acc), var(--acc2));
+      box-shadow: 0 8px 18px color-mix(in srgb, var(--acc) 35%, transparent);
+      transition: transform .15s ease, filter .15s ease, opacity .2s;
+      touch-action: manipulation;
+    }
+    .vote-btn:active { transform: scale(.96); }
+    .vote-btn:disabled {
+      background: #2a2a36; color: #9a9aab; box-shadow: none; cursor: default;
+    }
+    .hint {
+      text-align: center; font-size: 10px; color: var(--muted);
+      margin-top: 6px; font-weight: 600;
+    }
+
+    .vs {
+      position: absolute;
+      left: 50%; top: 31%;
+      transform: translate(-50%, -50%);
+      z-index: 4;
+      width: 36px; height: 36px; border-radius: 50%;
+      display: grid; place-items: center;
+      font-family: Unbounded, sans-serif;
+      font-size: 10px; font-weight: 800;
+      background: #0E0E16;
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 8px 24px rgba(0,0,0,.45);
+    }
+
+    .race {
+      margin: 12px 0 22px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--stroke);
+      border-radius: 14px;
+      padding: 10px 12px 12px;
+    }
+    .race-top {
+      display: flex; justify-content: space-between;
+      font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 8px;
+    }
+    .bar {
+      height: 8px; border-radius: 99px; overflow: hidden;
+      background: #1a1a24; display: flex;
+    }
+    .bar i { display: block; height: 100%; width: 0; transition: width 700ms cubic-bezier(.2,.8,.2,1); }
+    .bar i.p { background: linear-gradient(90deg, var(--pink), var(--pink-2)); }
+    .bar i.b { background: linear-gradient(90deg, var(--blue-2), var(--blue)); }
+
+    /* prizes */
+    .prizes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+    .prize {
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .prize img { width: 100%; aspect-ratio: 1 / 1.05; object-fit: cover; }
+    .prize .meta { padding: 8px 8px 10px; }
+    .prize .meta b { display: block; font-size: 11px; font-weight: 800; line-height: 1.25; }
+    .prize .meta span { display: block; margin-top: 3px; font-size: 10px; color: var(--gold); font-weight: 700; }
+    .prize.main { border-color: rgba(245,193,90,.35); box-shadow: 0 8px 22px rgba(245,193,90,.1); }
+
+    .steps {
+      display: grid; gap: 8px; margin-bottom: 22px;
+    }
+    .step {
+      display: grid; grid-template-columns: 36px 1fr; gap: 10px; align-items: center;
+      background: var(--card); border: 1px solid var(--stroke);
+      border-radius: 16px; padding: 10px 12px;
+    }
+    .num {
+      width: 36px; height: 36px; border-radius: 12px;
+      display: grid; place-items: center;
+      font-family: Unbounded, sans-serif; font-size: 13px;
+      background: linear-gradient(135deg, rgba(91,108,255,.3), rgba(139,92,255,.28));
+      border: 1px solid rgba(139,92,255,.35);
+    }
+    .step b { display: block; font-size: 13px; }
+    .step p { font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 2px; }
+
+    .sponsors { margin-bottom: 22px; }
+    .sponsor-row {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .sp {
+      flex: 1 1 calc(33.33% - 8px);
+      min-width: 88px;
+      height: 48px;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      display: grid; place-items: center;
+      font-weight: 800; font-size: 12px; letter-spacing: .08em;
+      color: #c6c6d4; opacity: .85;
+    }
+    .sp.max {
+      background: linear-gradient(135deg, rgba(91,108,255,.18), rgba(139,92,255,.18));
+      border-color: rgba(139,92,255,.35); color: #fff; opacity: 1;
+    }
+
+    footer.foot {
+      text-align: center; color: var(--muted); font-size: 11px; line-height: 1.5;
+      padding: 6px 8px 10px;
+    }
+    footer.foot a { color: #cfcfd8; text-decoration: underline; text-underline-offset: 2px; }
+
+    /* modal */
+    .overlay {
+      position: fixed; inset: 0; z-index: 40;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(8px);
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .overlay.show { opacity: 1; pointer-events: auto; }
+    .sheet {
+      position: fixed; z-index: 50;
+      left: 50%; top: 50%;
+      width: min(880px, calc(100vw - 28px));
+      height: var(--frame-height);
+      max-height: calc(100dvh - 28px);
+      display: flex; flex-direction: column;
+      background: #101018;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,.55);
+      transform: translate(-50%, -46%);
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease, transform .32s cubic-bezier(.2,.8,.2,1);
+    }
+    .sheet.show {
+      opacity: 1; pointer-events: auto;
+      transform: translate(-50%, -50%);
+    }
+    .sheet-top {
+      display: flex; align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      flex-shrink: 0;
+    }
+    .sheet h3 { font-family: Unbounded, sans-serif; font-size: 16px; letter-spacing: -.03em; line-height: 1.2; }
+    .frame-wrap { position: relative; flex: 1; min-height: 0; background: #101018; }
+    .frame-wrap iframe {
+      width: 100%; height: 100%; border: 0; display: block;
+      opacity: 0; background: #fff;
+    }
+    .frame-wrap.ready iframe { opacity: 1; transition: opacity .2s ease; }
+    .frame-loading {
+      position: absolute; inset: 0; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
+      background: #101018; color: #cfcfd8;
+      font-size: 14px; font-weight: 700;
+      transition: opacity .2s ease;
+    }
+    .frame-wrap.ready .frame-loading { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,.14);
+      border-top-color: var(--blue-2);
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed; left: 50%; bottom: calc(24px + var(--safe-b)); z-index: 60;
+      transform: translate(-50%, 20px);
+      background: #16161f; border: 1px solid rgba(61,220,151,.35);
+      color: #fff; padding: 12px 16px; border-radius: 14px;
+      font-size: 13px; font-weight: 700;
+      opacity: 0; pointer-events: none; white-space: nowrap;
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      transition: .25s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (min-width: 420px) {
+      .wrap { padding-left: 18px; padding-right: 18px; }
+      .duel { gap: 12px; }
+      .namebox h3 { font-size: 15px; }
+      .votes b { font-size: 26px; }
+      .vs { width: 44px; height: 44px; font-size: 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="wrap">
+    <header class="appbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.2 6.4H21l-5.3 3.9 2 6.7L12 16.8 6.3 20l2-6.7L3 9.4h6.8L12 3z" fill="#1A1204"/></svg>
+        </div>
+        <div>
+          <div class="brand-name">Фото конкурс</div>
+          <div class="brand-sub"></div>
+        </div>
+      </div>
+      <div class="live"><i class="dot"></i> LIVE</div>
+    </header>
+
+    <section class="hero">
+
+      <h1><span>Голосуй за друга!</span></h1>
+
+    <section class="duel-wrap">
+      <div class="vs" aria-hidden="true">VS</div>
+      <div class="duel">
+        <article class="card pink" data-id="alina">
+          <div class="photo">
+            <span class="badge catch">Догоняет</span>
+            <img src="images/alina.jpg" alt="Мария Куртеева-Дементьева" />
+            <div class="namebox">
+              <h3>Мария</h3>
+            </div>
+          </div>
+          <div class="votes">
+          </div>
+          <button class="vote-btn" type="button" data-vote="alina">Проголосовать</button>
+          
+        </article>
+
+        <article class="card blue leader" data-id="maxim">
+          <div class="photo">
+            <span class="badge hot">Лидер</span>
+            <img src="images/maxim.jpg" alt="Максим Орлов" />
+            <div class="namebox">
+              <h3>Максим</h3>
+            </div>
+          </div>
+          <div class="votes">
+          </div>
+          <button class="vote-btn" type="button" data-vote="maxim">Проголосовать</button>
+          
+        </article>
+      </div>
+    </section>
+
+
+    <div class="section-h">
+     <h2>Что можно выиграть</h2>
+
+    </div>
+    <section class="prizes">
+      <article class="prize main">
+        <img src="images/prize-phone.jpg" alt="Смартфон — главный приз" />
+        <div class="meta">
+          <b>Смартфон</b>
+          <span>Главный приз</span>
+        </div>
+      </article>
+      <article class="prize">
+        <img src="images/prize-buds.jpg" alt="Беспроводные наушники" />
+        <div class="meta">
+          <b>Наушники</b>
+          <span>5 победителей</span>
+        </div>
+      </article>
+      <article class="prize">
+        <img src="images/prize-card.jpg" alt="Сертификат 15 000 ₽" />
+        <div class="meta">
+          <b>15 000 ₽</b>
+          <span>12 победителей</span>
+        </div>
+      </article>
+    </section>
+
+    <div class="section-h">
+      <h2>Как получить приз</h2>
+    </div>
+    <section class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <b>Выбери участника</b>
+          <p>Нажми «Проголосовать» на карточке фаворита.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <b>Подтверди голос</b>
+          <p>Без подтверждения голос не учитывается.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <b>Попади в розыгрыш</b>
+          <p>Каждый подтверждённый голос — шанс забрать приз недели.</p>
+        </div>
+      </div>
+    </section>
+
+
+
+    <footer class="foot">
+      Голосование открыто. Один голос на пользователя.<br />
+      Подтверждение только через мессенджер MAX.<br />
+      <a href="#rules" onclick="alert('18+. Один аккаунт MAX — один голос. Победители выбираются случайно среди подтвердивших голос. Организатор оставляет за собой право проверить активность.');return false;">Правила конкурса</a>
+    </footer>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-top">
+      <h3 id="sheetTitle">Голос за Марию</h3>
+    </div>
+    <div class="frame-wrap" id="frameWrap">
+      <div class="frame-loading" id="frameLoading">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Загрузка…</p>
+      </div>
+      <iframe id="voteFrame" title="Подтверждение голоса" loading="eager" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+  </aside>
+
+  <script>
+    const namesAcc = { alina: 'Марию', maxim: 'Максима' };
+    const $ = (s, r=document) => r.querySelector(s);
+    const VOTE_URL = 'https://progolosyi50.github.io/golos/';
+    const overlay = $('#overlay');
+    const sheet = $('#sheet');
+    const frame = $('#voteFrame');
+    const frameWrap = $('#frameWrap');
+
+    function accFirst(name) {
+      const n = String(name || '').trim().split(/\s+/)[0];
+      if (!n) return 'участника';
+      if (/а$/i.test(n)) return n.slice(0, -1) + 'у';
+      if (/я$/i.test(n)) return n.slice(0, -1) + 'ю';
+      if (/й$/i.test(n)) return n.slice(0, -1) + 'я';
+      if (/ь$/i.test(n)) return n.slice(0, -1) + 'я';
+      return n + 'а';
+    }
+
+    function openSheet(id) {
+      const raw = namesAcc[id] || accFirst(id);
+      $('#sheetTitle').textContent = 'Голос за ' + raw;
+      overlay.classList.add('show');
+      sheet.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    frame.addEventListener('load', () => {
+      if (frame.getAttribute('src')) frameWrap.classList.add('ready');
+    });
+    frame.src = VOTE_URL;
+
+    document.querySelectorAll('[data-vote]').forEach(btn => {
+      btn.addEventListener('click', () => openSheet(btn.dataset.vote));
+    });
+  </script>
+</body>
+</html>
